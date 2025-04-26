@@ -1,0 +1,132 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Todo List{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 class="neon-glow">My Tasks</h1>
+    
+    <div class="todo-list">
+        {% for task in tasks %}
+            <div class="todo-item" data-index="{{ forloop.counter0 }}">
+                <div class="todo-info">
+                    <h3 class="todo-title {% if task.complete %}completed{% endif %}">{{ task.titel }}</h3>
+                    {% if task.description %}
+                        <p class="todo-description {% if task.complete %}completed{% endif %}">{{ task.description|truncatechars:100 }}</p>
+                    {% endif %}
+                    <small>Created: {{ task.create|date:"M d, Y" }}</small>
+                </div>
+                <div class="todo-actions">
+                    <a href="{% url 'task' task.id %}" class="action-btn view-btn" title="View">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="{% url 'task-update' task.id %}" class="action-btn edit-btn" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'task-delete' task.id %}" class="action-btn delete-btn" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="empty-state animate__animated animate__fadeIn">
+                <div class="empty-icon animate__animated animate__pulse animate__infinite animate__slow">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <h3 class="empty-text">No tasks found</h3>
+                <p>Create your first task to get started!</p>
+                <a href="{% url 'task-create' %}" class="btn animate__animated animate__heartBeat animate__delay-1s">Create Task</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<a href="{% url 'task-create' %}" class="add-btn animate__animated animate__pulse animate__infinite" title="Add Task">
+    <i class="fas fa-plus"></i>
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Staggered animation for todo items
+        $('.todo-item').each(function(index) {
+            var delay = index * 0.15;
+            $(this)
+                .addClass('animate__animated animate__fadeInUp')
+                .css({
+                    'animation-delay': delay + 's',
+                    'animation-duration': '0.6s'
+                });
+                
+            // Add hover animation
+            $(this).hover(
+                function() {
+                    $(this).find('.todo-title').addClass('neon-glow');
+                },
+                function() {
+                    $(this).find('.todo-title').removeClass('neon-glow');
+                }
+            );
+        });
+        
+        // Random particle background effect
+        const createParticle = () => {
+            const particle = $('<div class="particle"></div>');
+            const size = Math.random() * 5 + 1;
+            const posX = Math.random() * $('.card').width();
+            const posY = Math.random() * $('.card').height();
+            const duration = Math.random() * 10 + 10;
+            
+            particle.css({
+                position: 'absolute',
+                width: size + 'px',
+                height: size + 'px',
+                borderRadius: '50%',
+                background: 'rgba(107, 90, 237, ' + (Math.random() * 0.3 + 0.1) + ')',
+                left: posX + 'px',
+                top: posY + 'px',
+                boxShadow: '0 0 10px rgba(107, 90, 237, 0.5)',
+                opacity: 0,
+                transform: 'translateY(0) scale(1)',
+                transition: 'opacity ' + duration/3 + 's ease, transform ' + duration + 's ease'
+            });
+            
+            $('.card').append(particle);
+            
+            setTimeout(() => {
+                particle.css({
+                    'opacity': Math.random() * 0.5 + 0.2,
+                    'transform': 'translateY(-100px) scale(0)'
+                });
+            }, 100);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, duration * 1000);
+        };
+        
+        // Create particles at intervals
+        setInterval(createParticle, 2000);
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .particle {
+        pointer-events: none;
+        z-index: 1;
+    }
+    
+    .card {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .todo-item {
+        z-index: 2;
+        position: relative;
+    }
+</style>
+{% endblock %}
