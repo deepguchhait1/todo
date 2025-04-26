@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: todo-app
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn todo_list.wsgi:application"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: todo-db
+          property: connectionString
+
+databases:
+  - name: todo-db
+    databaseName: todo_db
+    plan: free 
